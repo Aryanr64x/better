@@ -71,11 +71,20 @@ def book_operations(id):
 
     elif request.method == 'PUT':
         data = request.json
+
+        cursor.execute('SELECT * FROM books WHERE id = ?', (id,))
+        book = cursor.fetchone()
+        
+        if not book:
+            conn.close()
+            return jsonify({"error": "Book not found"}), 404 
+        
         cursor.execute('UPDATE books SET title = ?, author = ?, available = ? WHERE id = ?',
-                       (data['title'], data['author'], data['available'], id))
+                    (data['title'], data['author'], data['available'], id))
         conn.commit()
         conn.close()
-        return jsonify({"message": "Book updated successfully"})
+
+        return jsonify({"message": "Book updated successfully"}), 200
 
     elif request.method == 'DELETE':
         cursor.execute('DELETE FROM books WHERE id = ?', (id,))
